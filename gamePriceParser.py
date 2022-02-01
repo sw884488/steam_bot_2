@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import botAnswer as ba
 
 l = {}
 s = []
@@ -12,16 +13,17 @@ def gamePrice(url):
     for i in soup.find_all("div", class_="game_purchase_action"):
         if i.find("div", class_="game_purchase_price price") and i.parent.find("div", class_="game_area_purchase_platform"):
             l[i.parent.find("h1").contents[0].string.strip()] = i.find("div", class_="game_purchase_price price").string.strip()
-            s.append(0)
+            s.append("Скидки нет")
         elif i.find("div", class_="discount_final_price") and i.parent.find("div", class_="game_area_purchase_platform"):
             discount = True
             l[i.parent.find("h1").contents[0].string.strip()] = i.find("div", class_="discount_final_price").string.strip()
             if i.find("div", class_="discount_pct"):
-                s.append(i.find("div", class_="discount_pct").contents[0].string.strip())
+                s.append(i.find("div", class_="discount_pct").contents[0].string.strip()[1:])
             else:
-                s.append(i.find("div", class_="bundle_base_discount").contents[0].string.strip())
+                s.append(i.find("div", class_="bundle_base_discount").contents[0].string.strip()[1:])
 
-    return l, s, discount
+    # return l, s, discount
+    return ba.botAnswer(l, s, discount)
 
 
 
