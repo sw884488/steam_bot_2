@@ -29,6 +29,8 @@ def gamePrice(url):
 
 # print(gamePrice("https://store.steampowered.com/app/1551360/Forza_Horizon_5/"))
 
+# efnffff
+
 # print(gamePrice("https://store.steampowered.com/app/289070/Sid_Meiers_Civilization_VI/"))
 
 # print(gamePrice("https://store.steampowered.com/app/39210/FINAL_FANTASY_XIV_Online/"))
