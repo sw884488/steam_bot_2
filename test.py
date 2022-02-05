@@ -1,22 +1,46 @@
 from aiogram import Bot, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 import gamePriceParser as sp
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext
 import asyncio
 import datetime
+from  states import test  as stt
 
 
 s = {}
 
 
 bot = Bot(token="2071229081:AAFEs-aotdzKVpyKP3elnmpO2BP3npfiGQs")
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 
 
 
 
+
+@dp.message_handler(commands=['test'], state = None)
+async def test(msg: types.Message):
+    await msg.answer("1?")
+    await stt.Q1.set()
+
+
+@dp.message_handler(state = stt.Q1)
+async def ans1(msg: types.Message, state: FSMContext):
+    answer = msg.text
+    await state.update_data(answer1 = answer)
+    await msg.answer("2?")
+    await stt.next()
+
+@dp.message_handler(state = stt.Q2)
+async def ans2(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    answer1 = data.get("answer1")
+    answer2 = msg.text
+    await state.finish()
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(msg: types.Message):
@@ -44,9 +68,9 @@ async def menu(msg : types.Message):
 #     asyncio.create_task(scheduler(datetime.datetime(2022, 2, 3, 11, 7)))
 
 
-@dp.message_handler()
-async def echo_message(msg: types.Message):
-    await bot.send_message(msg.from_user.id, sp.gamePrice(msg.text))
+# @dp.message_handler()
+# async def echo_message(msg: types.Message):
+#     await bot.send_message(msg.from_user.id, sp.gamePrice(msg.text))
 
 async def testf(n):
     await bot.send_message(n, "msg.text")
