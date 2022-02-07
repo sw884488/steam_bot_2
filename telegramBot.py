@@ -27,21 +27,17 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 async def start(msg: types.Message):
     await msg.answer("Привет! Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Начать' в меню")
 
+
 @dp.message_handler(commands=['help'], state="*")
 async def start(msg: types.Message, state: FSMContext):
     await state.finish()
     await msg.answer("Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Добавить игру в меню' в меню")
 
 
-
-
-
-
-
 @dp.message_handler(commands=['s'], state = None)
 async def test(msg: types.Message):
     await msg.answer("Напишите название игры")
-    await stt.Q1.set()
+    await stt.waiting_for_game_name.set()
 
 
 @dp.message_handler(commands=['cancel'], state="*")
@@ -50,7 +46,7 @@ async def cancel(message: types.Message, state: FSMContext):
     await message.answer("Действие отменено. Для старта напишите /s ")
 
 
-@dp.message_handler(state = stt.Q1)
+@dp.message_handler(state = stt.waiting_for_game_name)
 async def ans1(msg: types.Message, state: FSMContext):
     answer = msg.text
     l = gsp.gameSearch(msg.text)
@@ -63,7 +59,8 @@ async def ans1(msg: types.Message, state: FSMContext):
     await msg.answer("Напишите номер игры. Если игры нет в списке, повторите поиск, уточнив название")
     await stt.next()
 
-@dp.message_handler(state = stt.Q2)
+
+@dp.message_handler(state = stt.waiting_for_game_number)
 async def ans2(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     answer1 = data.get("answer1")
@@ -71,6 +68,8 @@ async def ans2(msg: types.Message, state: FSMContext):
     user_data[msg.from_user.id] = [g[int(msg.text)]]
     await msg.answer("Данные получены")
     await state.finish()
+
+
 
 
 @dp.message_handler()
