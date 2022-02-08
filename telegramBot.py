@@ -14,7 +14,7 @@ import gameSearchAnswer as gsa
 
 
 user_data = {}
-g = {}
+games_list = {}
 
 
 bot = Bot(token="2071229081:AAFEs-aotdzKVpyKP3elnmpO2BP3npfiGQs")
@@ -26,6 +26,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
     await msg.answer("Привет! Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Начать' в меню")
+    user_data[msg.from_user.id] = []
 
 
 @dp.message_handler(commands=['help'], state="*")
@@ -50,10 +51,11 @@ async def cancel(message: types.Message, state: FSMContext):
 async def ans1(msg: types.Message, state: FSMContext):
     answer = msg.text
     l = gsp.gameSearch(msg.text)
+    print(l)
     q = 0
     for key, value in l.items():
-        await msg.answer(str(key) + ". " + value)
-        g[q] = l[key]
+        await msg.answer(str(q) + ". " + str(key) + ". " + value)
+        games_list[q] = l[key]
         q += 1
     await state.update_data(answer1 = answer)
     await msg.answer("Напишите номер игры. Если игры нет в списке, повторите поиск, уточнив название")
@@ -65,7 +67,7 @@ async def ans2(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     answer1 = data.get("answer1")
     answer2 = msg.text
-    user_data[msg.from_user.id] = [g[int(msg.text)]]
+    user_data[msg.from_user.id].append(games_list[int(msg.text)])
     await msg.answer("Данные получены")
     await state.finish()
 
@@ -75,6 +77,7 @@ async def ans2(msg: types.Message, state: FSMContext):
 @dp.message_handler()
 async def f(msg: types.message):
     await msg.answer(user_data[msg.from_user.id])
+    print(user_data)
 
 
 
