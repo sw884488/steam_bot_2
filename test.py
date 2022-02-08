@@ -22,6 +22,18 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 
+async def scheduler(msg: types.Message):
+    while True:
+        await asyncio.sleep(1)
+        await msg.answer(sp.gamePrice(user_data[msg.from_user.id][0]))
+
+
+
+
+async def on_startup():
+    asyncio.create_task(scheduler())
+
+
 
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
@@ -54,7 +66,7 @@ async def ans1(msg: types.Message, state: FSMContext):
     q = 0
     for key, value in l.items():
         await msg.answer(str(q) + ". " + str(key) + "\n" + value)
-        await asyncio.sleep(1)
+        # await asyncio.sleep(1)
         games_list[q] = l[key]
         q += 1
     await state.update_data(answer1 = answer)
@@ -69,6 +81,7 @@ async def ans2(msg: types.Message, state: FSMContext):
     answer2 = msg.text
     user_data[msg.from_user.id].append(games_list[int(msg.text)])
     await msg.answer("Данные получены")
+    asyncio.create_task(scheduler(msg))
     await state.finish()
 
 
@@ -76,8 +89,9 @@ async def ans2(msg: types.Message, state: FSMContext):
 
 @dp.message_handler()
 async def f(msg: types.message):
-    await msg.answer(user_data[msg.from_user.id])
-    print(user_data)
+    await bot.send_message(msg.from_user.id, sp.gamePrice(msg.text))
+    # await msg.answer(user_data[msg.from_user.id])
+    # print(user_data)
 
 
 
@@ -109,17 +123,24 @@ async def testf(n):
     await bot.send_message(n, "msg.text")
 
 
-async def scheduler(dt):
-    now = datetime.datetime.now()
-    await asyncio.sleep((dt - now).total_seconds())
-    print(1)
 
 
 
 
-async def on_startup(_):
-    asyncio.create_task(scheduler(datetime.datetime(2022, 2, 3, 11, 5)))
+
+
+
+# async def scheduler(dt):
+#     now = datetime.datetime.now()
+#     await asyncio.sleep((dt - now).total_seconds())
+#     print(sp.gamePrice(user_data[""]))
+#
+#
+#
+#
+# async def on_startup(_):
+#     asyncio.create_task(scheduler(datetime.datetime(2022, 2, 3, 11, 5)))
 
 
 if __name__ == '__main__':
-    executor.start_polling(dp, on_startup=on_startup)
+    executor.start_polling(dp)
