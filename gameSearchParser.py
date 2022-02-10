@@ -12,6 +12,7 @@ def gameSearch(request):
             gameSearchResult[i.find("span", class_="title").string] = i["href"]
             counter += 1
         else:
+            return gameSearchResult
             break
     # return gsa.gameSearchAnswer(gameSearchResult)
     return gameSearchResult
