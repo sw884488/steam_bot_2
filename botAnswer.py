@@ -1,7 +1,6 @@
 
 
 def botAnswer(l, s, discount):
-    print(l, s)
     st = ""
     if discount == True:
         st += "Скидка уже есть\n\n"

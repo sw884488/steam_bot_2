@@ -79,7 +79,6 @@ async def gameNumber(msg: types.Message, state: FSMContext):
     else:
         await state.finish()
         user_data[msg.from_user.id] = games_list[int(msg.text)]
-        print(user_data)
         await asyncio.create_task(scheduler(msg, user_data[msg.from_user.id]))
 
 
