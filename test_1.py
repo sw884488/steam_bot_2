@@ -10,11 +10,18 @@ import gameSearchParser as gsp
 import gameSearchAnswer as gsa
 
 
+
+
 bot = Bot(token="2071229081:AAFEs-aotdzKVpyKP3elnmpO2BP3npfiGQs")
 dp = Dispatcher(bot, storage=MemoryStorage())
 
+
 games_list = {}
 user_data = {}
+
+
+
+
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
     await msg.answer(
@@ -34,12 +41,15 @@ async def start(msg: types.Message, state: FSMContext):
         "Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Добавить игру в меню' в меню")
 
 
+async def scheduler(msg: types.Message, n):
+    await msg.answer(sp.gamePrice(n))
+
+
 
 
 @dp.message_handler(commands=['s'])
 async def s(msg: types.Message, state: FSMContext):
     await msg.answer("Напишите название игры")
-    user_data[msg.from_user.id] = []
     await state.set_state('waiting_for_game_name')
 
 
@@ -51,7 +61,8 @@ async def gameName(msg: types.Message, state: FSMContext):
     if len(l) > 0:
         for key, value in l.items():
             await msg.answer(str(q) + ". " + str(key) + "\n")
-            await asyncio.sleep(0.1)
+
+            await asyncio.sleep(0.5)
             games_list[q] = l[key]
             q += 1
         await msg.answer("Выберите номер игры из списка")
@@ -62,12 +73,14 @@ async def gameName(msg: types.Message, state: FSMContext):
 
 @dp.message_handler(state='waiting_for_game_number')
 async def gameNumber(msg: types.Message, state: FSMContext):
+    user_data[msg.from_user.id] = ""
     if msg.text.isnumeric() == False or int(msg.text) > len(games_list) or int(msg.text) == 0:
         await msg.answer("Вы ввели не число или число вне диапазона")
     else:
         await state.finish()
-        user_data[msg.from_user.id].append(games_list[int(msg.text)])
-        await msg.answer(sp.gamePrice(user_data[msg.from_user.id][0]))
+        user_data[msg.from_user.id] = games_list[int(msg.text)]
+        print(user_data)
+        await asyncio.create_task(scheduler(msg, user_data[msg.from_user.id]))
 
 
 

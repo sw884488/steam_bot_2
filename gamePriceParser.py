@@ -7,6 +7,8 @@ s = []
 t = []
 discount = False
 def gamePrice(url):
+    l = {}
+    s = []
     discount = False
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
