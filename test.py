@@ -7,50 +7,46 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 import asyncio
 import datetime
-from  states import test  as stt
+from states import test as stt
 import gameSearchParser as gsp
 import gameSearchAnswer as gsa
 
-
-
 user_data = {}
 games_list = {}
-
 
 bot = Bot(token="2071229081:AAFEs-aotdzKVpyKP3elnmpO2BP3npfiGQs")
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-
 async def scheduler(msg: types.Message):
-    while True:
-        await asyncio.sleep(1)
-        await msg.answer(sp.gamePrice(user_data[msg.from_user.id][0]))
-
-
+    # while True:
+    #     await asyncio.sleep(1)
+    await msg.answer(sp.gamePrice(user_data[msg.from_user.id][0]))
 
 
 async def on_startup():
     asyncio.create_task(scheduler())
 
 
-
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
-    await msg.answer("Привет! Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Начать' в меню")
+    await msg.answer(
+        "Привет! Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Начать' в меню")
     user_data[msg.from_user.id] = []
 
 
 @dp.message_handler(commands=['help'], state="*")
 async def start(msg: types.Message, state: FSMContext):
     await state.finish()
-    await msg.answer("Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Добавить игру в меню' в меню")
+    await msg.answer(
+        "Это бот для мониторинга цен на игры в Steam. Чтобы начать, напишите /s или выберите 'Добавить игру в меню' в меню")
 
 
-@dp.message_handler(commands=['s'], state = None)
-async def test(msg: types.Message):
+@dp.message_handler(commands=['s'])
+async def test(msg: types.Message, state: FSMContext):
     await msg.answer("Напишите название игры")
     await stt.waiting_for_game_name.set()
+    # await state.set_state('*')
 
 
 @dp.message_handler(commands=['cancel'], state="*")
@@ -59,9 +55,10 @@ async def cancel(message: types.Message, state: FSMContext):
     await message.answer("Действие отменено. Для старта напишите /s ")
 
 
-@dp.message_handler(state = stt.waiting_for_game_name)
+@dp.message_handler(state=stt.waiting_for_game_name)
 async def ans1(msg: types.Message, state: FSMContext):
-    answer = msg.text
+    await state.set_state('asdas')
+
     l = gsp.gameSearch(msg.text)
     q = 0
     for key, value in l.items():
@@ -69,22 +66,22 @@ async def ans1(msg: types.Message, state: FSMContext):
         # await asyncio.sleep(1)
         games_list[q] = l[key]
         q += 1
-    await state.update_data(answer1 = answer)
+    # await state.update_data(answer1=answer)
     await msg.answer("Напишите номер игры. Если игры нет в списке, повторите поиск, уточнив название")
-    await stt.next()
+    # await stt.next()
 
 
-@dp.message_handler(state = stt.waiting_for_game_number)
+@dp.message_handler(state='asdas')
 async def ans2(msg: types.Message, state: FSMContext):
-    data = await state.get_data()
-    answer1 = data.get("answer1")
-    answer2 = msg.text
-    user_data[msg.from_user.id].append(games_list[int(msg.text)])
-    await msg.answer("Данные получены")
-    asyncio.create_task(scheduler(msg))
-    await state.finish()
-
-
+    if msg.text.isnumeric() == False:
+        await msg.answer(
+            "Вы ввели не число. Если вы хотите начать поиск заново, напишите /cancel или выберите соответствующую команду в меню")
+        # await state.finish()
+    else:
+        user_data[msg.from_user.id].append(games_list[int(msg.text)])
+        await msg.answer("Данные получены")
+        await asyncio.create_task(scheduler(msg))
+        await state.finish()
 
 
 @dp.message_handler()
@@ -92,21 +89,6 @@ async def f(msg: types.message):
     await bot.send_message(msg.from_user.id, sp.gamePrice(msg.text))
     # await msg.answer(user_data[msg.from_user.id])
     # print(user_data)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # @dp.message_handler(commands=['help'])
@@ -121,13 +103,6 @@ async def f(msg: types.message):
 
 async def testf(n):
     await bot.send_message(n, "msg.text")
-
-
-
-
-
-
-
 
 
 # async def scheduler(dt):
