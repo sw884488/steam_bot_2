@@ -16,6 +16,6 @@ def botAnswer(l, s, discount):
             st+= value
             st+="\n\n"
     else:
-        return "Скидки пока нет"
+        return "Скидки нет"
     return st
 
